@@ -1,0 +1,10 @@
+fastapi>=0.115.0
+uvicorn>=0.30.0
+sse-starlette>=2.1.0
+python-dotenv>=1.0.0
+numpy>=1.26.0
+networkx>=3.3
+scikit-learn>=1.5.0
+autogen-agentchat>=0.4.0
+autogen-ext[openai]>=0.4.0
+openai>=1.0.0

@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+*.egg-info/
+.venv/
+venv/
+
+# Runtime data
+t1-shadow-omega-core/data/
+
+# Frontend
+t1-agents-league-ui/node_modules/
+t1-agents-league-ui/dist/
+t1-agents-league-ui/.vite/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;500;700&display=swap');
+
+:root {
+  --bg-main: #02040a;
+  --bg-panel: rgba(10, 14, 23, 0.7);
+  --border-dim: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(56, 189, 248, 0.2);
+  
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  
+  --accent-blue: #38bdf8;
+  --accent-gold: #fbbf24;
+  --accent-red: #f87171;
+  --accent-green: #34d399;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.title-font {
+  font-family: 'Orbitron', sans-serif;
+}
+
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+  overflow: hidden;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.glass-panel:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.1), 0 0 20px var(--border-glow);
+}
+
+.glow-text-blue {
+  color: var(--accent-blue);
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+}
+
+.glow-text-gold {
+  color: var(--accent-gold);
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+}
+
+.glow-text-red {
+  color: var(--accent-red);
+  text-shadow: 0 0 12px rgba(248, 113, 113, 0.6);
+}
+
+.glow-text {
+  color: var(--accent-blue);
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 4px 0px rgba(74, 222, 128, 0.6); }
+  50%       { box-shadow: 0 0 10px 3px rgba(74, 222, 128, 0.9); }
+}
+.pulse-glow {
+  animation: pulseGlow 1.8s ease-in-out infinite;
+}
+
+/* Scanning animation for empty cells while awaiting first snapshot */
+@keyframes textScan {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.85; }
+}
+.scan-animate {
+  animation: textScan 1.2s ease-in-out infinite;
+  color: #444;
+}
+
+/* Mobile responsive — vertical 3-section layout below 1200px */
+@media (max-width: 1200px) {
+  .main-panels {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+  }
+  .pre-stage-panel {
+    flex: 0 0 180px !important;
+    border-right: none !important;
+    border-bottom: 1px solid #1a1a2e;
+    min-height: 180px;
+  }
+  .dark-market-panel {
+    flex: 0 0 auto !important;
+    min-height: 320px;
+  }
+  .post-stage-panel {
+    flex: 0 0 300px !important;
+    border-left: none !important;
+    border-top: 1px solid #1a1a2e;
+    min-height: 300px;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
+}
