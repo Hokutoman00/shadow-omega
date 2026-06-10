@@ -26,6 +26,57 @@ Static analysis tools (ESLint, SonarQube, Semgrep) catch known patterns — they
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+```mermaid
+graph TD
+    subgraph INPUT["Pre-Stage — AST Entropy Mapping"]
+        SC[Source Code] --> AST[AST Parser]
+        AST --> EM[Entropy Scoring]
+        EM --> AP["Attack Surface Planets\n(high-entropy nodes)"]
+    end
+
+    subgraph FOUNDRY["Microsoft AI Infrastructure"]
+        AZF["Azure AI Foundry\nPriority 1 — AzureOpenAIChatCompletionClient"]
+        GHM["GitHub Models\nPriority 2 — OpenAIChatCompletionClient\nmodels.inference.ai.azure.com"]
+        PHY["Physics Fallback\nzero-credential operation"]
+    end
+
+    subgraph STRATEGIC["Strategic Layer — AutoGen v0.4 Council  (every 10 turns)"]
+        AA["AttackerAgent\nAssistantAgent"] <-->|"evolve attack strategy"| DA["DefenderAgent\nAssistantAgent"]
+        CO["ConvergenceOrchestrator\nAssistantAgent — semantic cross-universe analysis"]
+    end
+
+    subgraph PHYSICS["Physics Layer — Fast Simulation  (0.4 s / turn)"]
+        U0["Universe 0 · AGGRESSIVE\n20 islands × Attacker + Defender"]
+        U1["Universe 1 · STEALTHY\n20 islands × Attacker + Defender"]
+        U2["Universe 2 · ADAPTIVE\n20 islands × Attacker + Defender"]
+        U3["Universe 3 · AGGRESSIVE\n20 islands × Attacker + Defender"]
+        U4["Universe 4 · STEALTHY\n20 islands × Attacker + Defender"]
+    end
+
+    subgraph POST["Post-Stage — Convergence & Export"]
+        CD["ConvergenceDetector\nhash fingerprint matching"]
+        FR["Fossil Record\narchetype store"]
+        EL["ESLint Rule\nskeleton export"]
+    end
+
+    subgraph UI["React Dashboard — SSE Streaming"]
+        FG["3D Force Graph\nAST attack-surface planets"]
+        UL["Universe Ledgers\nfitness · sigma · TDA barcodes"]
+        CB["Convergence Banner\nLIVE THREAT DISCOVERED"]
+        PS["Post-Stage Panel\nIB loss gauge + IDE mockup"]
+    end
+
+    AP --> U0 & U1 & U2 & U3 & U4
+    AZF & GHM & PHY --> STRATEGIC
+    STRATEGIC -->|"epoch strategy signal"| U0 & U1 & U2 & U3 & U4
+    U0 & U1 & U2 & U3 & U4 -->|"strategy fingerprints"| CD
+    CD -->|"3+ universes converged"| FR & CO
+    FR --> EL
+    U0 & U1 & U2 & U3 & U4 -->|"SSE events"| UI
+    EL --> PS
+    CD --> CB
+```
+
 ### Pre-Stage — AST Entropy Mapping
 - Parses the target source code into an AST (Abstract Syntax Tree)
 - Computes topological entropy across nodes (σ — chaos coefficient)
