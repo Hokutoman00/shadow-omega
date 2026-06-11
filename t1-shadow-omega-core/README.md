@@ -205,7 +205,7 @@ npm run dev
 ### Run the Simulation
 
 1. Open `http://localhost:5173`
-2. Click **START SIMULATION**
+2. Click **INITIATE MULTIVERSE**
 3. Watch 5 universes evolve in real time
 4. Convergence events fire when 3+ universes independently discover the same attack strategy
 5. Each convergence event exports an ESLint rule skeleton to the Archetype panel

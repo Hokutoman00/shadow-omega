@@ -1,16 +1,30 @@
-# React + Vite
+# Shadow-Ω Frontend — Multiverse Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 18 + Vite 6 dashboard that renders the live state of all 5 adversarial universes streamed from the backend over Server-Sent Events.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+# → http://localhost:5173 → click INITIATE MULTIVERSE
+```
 
-## React Compiler
+Requires the backend running on port 8090 (`cd ../t1-shadow-omega-core && uvicorn main:app --port 8090`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Panels
 
-## Expanding the ESLint configuration
+| Component | Role |
+|-----------|------|
+| `ASTGraphPanel` | Pre-Stage — 3D force-directed graph of AST entropy planets (react-force-graph-3d / Three.js) |
+| `MultiverseGrid` / `MultiverseDisplay` | Mid-Stage — per-universe ledger: ATK/DEF fitness, σ chaos coefficient, TDA H₀/H₁ barcodes |
+| `DarkMarketLedger` / `DarkMarketTicker` | Real-time mutation trade feed between agent islands |
+| `SigmaGaugePanel` | Edge-of-chaos monitor (target σ ≈ 1.0) |
+| `ConvergenceBanner` | LIVE THREAT alert when 3+ universes converge on the same strategy fingerprint |
+| `PostStageBottleneck` | Information Bottleneck loss gauge |
+| `ArchetypeOutputPanel` | Fossil Record archetypes + exported ESLint rule skeletons |
+| `VSCodeMockup` | Editor mockup showing the generated ESLint rule firing on the vulnerable source |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Stack
+
+React 18, Vite 6, Framer Motion, react-force-graph-3d (Three.js). State is driven entirely by the SSE event stream — no client-side simulation.
