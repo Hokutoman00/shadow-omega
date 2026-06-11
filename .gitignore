@@ -18,3 +18,4 @@ t1-agents-league-ui/.vite/
 # OS
 .DS_Store
 Thumbs.db
+demo/
