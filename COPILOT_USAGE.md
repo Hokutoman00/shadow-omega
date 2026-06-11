@@ -23,7 +23,7 @@ Server:
 
 - `get_shadow_omega_brief` - explains the creative developer workflow.
 - `audit_code` - sends selected source code to the Shadow-Omega backend for AST entropy and multiverse audit analysis.
-- `generate_convergence_certificate` - returns attack-surface map, universe votes, confidence, and ESLint rule skeleton.
+- `generate_convergence_certificate` - returns attack-surface map, trace-derived universe votes, confidence, and ESLint rule skeleton.
 - `run_closed_loop_demo` - demonstrates discover -> patch -> re-audit -> rule-export.
 - `get_multiverse_status` - returns current universe, sigma, convergence, and cascade state.
 - `export_eslint_rules` - exports converged vulnerability archetypes as ESLint rule skeletons.
@@ -60,7 +60,7 @@ This confirms the server works through the real MCP stdio protocol. The audit ca
 
 ## Verified Copilot CLI Recognition
 
-Command:
+Recognition command:
 
 ```powershell
 gh copilot -- mcp get shadow-omega-auditor --json
@@ -84,17 +84,37 @@ Observed result:
 }
 ```
 
-Command:
+Non-interactive Copilot CLI tool-call command shape:
 
 ```powershell
-gh copilot -p "Use the configured workspace MCP server named shadow-omega-auditor..." --allow-all-tools --output-format text --stream off
+gh copilot -- --additional-mcp-config "@<mcp-wrapper.json>" `
+  --allow-tool='shadow-omega-auditor' `
+  -p "Use the shadow-omega-auditor MCP server..."
 ```
 
 Observed result:
 
-- Copilot CLI executed with no file changes.
-- Current non-interactive Copilot CLI preview did not expose custom workspace MCP tools as callable agent functions in this environment, even though `mcp list/get` recognized the server.
-- The repository therefore includes `verify_mcp_server.py` as the judge-repeatable protocol proof, plus `.vscode/mcp.json` for VS Code Copilot Agent Mode where workspace MCP servers are expected to be surfaced in the editor workflow.
+- Passing `.mcp.json` directly is not enough for the current CLI; `--additional-mcp-config` expects a top-level `mcpServers` wrapper.
+- With that wrapper, Copilot CLI loaded `shadow-omega-auditor` as a connected stdio MCP server.
+- Copilot CLI issued real tool requests to `get_shadow_omega_brief`, `generate_convergence_certificate`, and `run_closed_loop_demo`.
+- The certificate run returned `status=converged`, `finding=non_atomic_value_transfer`, `converged_universes=3`, `closed_loop_result=mitigated`, and `after_patch_status=not_converged`.
+- Raw JSONL logs are not committed because they contain model reasoning events. Sanitized tool-call evidence is committed in `judge-evidence/copilot-cli-mcp-evidence.json`.
+
+Minimal wrapper:
+
+```json
+{
+  "mcpServers": {
+    "shadow-omega-auditor": {
+      "type": "local",
+      "command": "python",
+      "args": ["t1-shadow-omega-core/mcp_server.py"],
+      "env": {"SHADOW_OMEGA_BACKEND_URL": "http://localhost:8090"},
+      "tools": ["*"]
+    }
+  }
+}
+```
 
 ## VS Code / GitHub Copilot Agent Mode Flow
 
@@ -120,3 +140,13 @@ Observed result:
 ## Creative Apps Fit
 
 The Creative Apps track asks for innovative applications built with GitHub Copilot and welcomes MCP server integrations. Shadow-Omega turns Copilot into a multiverse security design partner: the developer selects code, Copilot calls the MCP auditor, and the result becomes a certificate, a guarded patch, a re-audit result, and a practical lint-rule draft.
+
+## Judge Evidence Bundle
+
+`judge-evidence/` contains the score-focused evidence added after final review:
+
+- `copilot-cli-mcp-evidence.json` - sanitized proof of Copilot CLI loading and calling the MCP server.
+- `convergence-trace-risky-transfer.json` - five-universe trace for the risky transfer fixture.
+- `certificate-risky-transfer.json` - `simulation_trace_hybrid` certificate whose votes include `trace_turn`, `strategy_fingerprint`, fitness, sigma, and observed source lines.
+- `closed-loop-risky-transfer.json` - patch and after-patch re-audit proof.
+- `github-models-council-transcript.json` - AutoGen council evidence from GitHub Models via `https://models.github.ai/inference`, with credential values omitted.

@@ -149,7 +149,7 @@ def generate_convergence_certificate(source_code: str) -> str:
     """
     Generate a judge-repeatable convergence certificate for selected code.
 
-    This deterministic certificate makes Shadow-Omega's core claim inspectable:
+    This trace-backed certificate makes Shadow-Omega's core claim inspectable:
     at least 3 independent adversarial universe profiles must converge on the
     same vulnerability family before the finding is treated as certifiable.
 
@@ -157,8 +157,8 @@ def generate_convergence_certificate(source_code: str) -> str:
         source_code: Source code string to certify
 
     Returns:
-        JSON string containing attack-surface map, universe votes, confidence,
-        strategy fingerprint, and ESLint rule skeleton when converged
+        JSON string containing attack-surface map, trace-derived universe votes,
+        confidence, strategy fingerprint, and ESLint rule skeleton when converged
     """
     return dumps_certificate(build_convergence_certificate(source_code))
 

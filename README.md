@@ -46,7 +46,7 @@ npm install && npm run dev
 # → http://localhost:5173 → click INITIATE MULTIVERSE
 ```
 
-To enable the AutoGen + LLM strategic layer, copy [t1-shadow-omega-core/.env.example](t1-shadow-omega-core/.env.example) to `.env` and fill either the GitHub Models values or the Azure AI Foundry values described there.
+To enable the AutoGen + LLM strategic layer, copy [t1-shadow-omega-core/.env.example](t1-shadow-omega-core/.env.example) to `.env` and fill either the GitHub Models values or the Azure AI Foundry values described there. GitHub Models defaults to `https://models.github.ai/inference`.
 
 ## GitHub Copilot + MCP Creative Workflow
 
@@ -68,6 +68,8 @@ The repository includes three MCP entry points:
 
 The server exposes `get_shadow_omega_brief`, `audit_code`, `generate_convergence_certificate`, `run_closed_loop_demo`, `get_multiverse_status`, and `export_eslint_rules`. Usage details and verification output live in [COPILOT_USAGE.md](COPILOT_USAGE.md).
 
+Sanitized P1/P2/P3 judge evidence lives in [judge-evidence/](judge-evidence/): Copilot CLI MCP tool calls, trace-backed certificate output, closed-loop re-audit, and a GitHub Models AutoGen council transcript with secret values omitted.
+
 ## Convergence Certificate
 
 Shadow-Ω's differentiator is not "another AI review." It requires independent adversarial universes to converge before a finding becomes actionable. Judges can inspect that claim directly:
@@ -79,7 +81,7 @@ python t1-shadow-omega-core/verify_mcp_server.py
 For the risky transfer fixture, the MCP server returns a certificate with:
 
 - attack-surface map: balance guard, split mutation, missing amount validation, missing atomic boundary
-- 5 universe votes from different attacker models
+- 5 trace-derived universe votes from different attacker models, each with trace turn, strategy fingerprint, fitness, sigma, and observed source lines
 - certifiable convergence when 3+ universes agree on the same finding family
 - confidence formula `1 - (1/N)^(k-1)`
 - ESLint rule skeleton
@@ -96,6 +98,7 @@ screenshots/            UI captures (see screenshots/README.md)
 .mcp.json               Copilot CLI workspace MCP server config
 .vscode/mcp.json        VS Code Copilot Agent Mode MCP server config
 COPILOT_USAGE.md        Copilot / MCP usage and verification record
+judge-evidence/         Sanitized Copilot CLI, trace certificate, closed-loop, and GitHub Models council evidence
 ```
 
 ## Tech Stack

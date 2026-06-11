@@ -1,0 +1,220 @@
+{
+  "schema": "shadow-omega.convergence-certificate.v1",
+  "mode": "simulation_trace_hybrid",
+  "subject_sha256": "22f0807a1ac8c721fb33efc444862749d2742ae050b757e61261031e2e05176c",
+  "status": "converged",
+  "finding": "non_atomic_value_transfer",
+  "severity": "high",
+  "total_universes": 5,
+  "converged_universes": 3,
+  "confidence": 0.96,
+  "confidence_formula": "1 - (1/N)^(k-1)",
+  "strategy_fingerprint": "9bef1644a2fabc498f75fccbfe772da82d56daf1eb0a729d07c81fc7c0410970",
+  "attack_surface_map": [
+    {
+      "surface": "balance_guard",
+      "lines": [
+        2
+      ],
+      "meaning": "A guard checks available funds before all mutations complete."
+    },
+    {
+      "surface": "state_mutation",
+      "lines": [
+        3,
+        4
+      ],
+      "meaning": "Two account-like values are mutated as separate effects."
+    },
+    {
+      "surface": "amount_validation",
+      "lines": [],
+      "meaning": "Missing or weak amount validation lets invalid values invert the transfer."
+    },
+    {
+      "surface": "atomicity_boundary",
+      "lines": [],
+      "meaning": "A transaction or lock boundary is required for durable mitigation."
+    }
+  ],
+  "trace_summary": {
+    "trace_id": "trace-22f0807a1ac8c721",
+    "trace_schema": "shadow-omega.simulation-trace.v1",
+    "turn_span": [
+      70,
+      74
+    ],
+    "vote_derivation": "universe_votes are filtered from simulation_trace.turns",
+    "backend_parity": "Uses the same public invariant as the live backend: a finding becomes certifiable only when at least 3 independent universe profiles converge on the same vulnerability family."
+  },
+  "evidence_sources": [
+    {
+      "type": "source_static_features",
+      "fields": [
+        "balance_guard_lines",
+        "state_mutation_lines",
+        "amount_validation_lines",
+        "atomic_boundary_lines"
+      ]
+    },
+    {
+      "type": "deterministic_simulation_trace",
+      "trace_id": "trace-22f0807a1ac8c721",
+      "mode": "deterministic_simulation_trace"
+    },
+    {
+      "type": "live_backend_parity",
+      "note": "Run audit_code(source_code) against the backend for the live simulation; this certificate keeps the same convergence invariant for judge-repeatable Copilot/MCP review."
+    }
+  ],
+  "universe_votes": [
+    {
+      "universe_id": 0,
+      "name": "Economic Extractor",
+      "dna": "aggressive",
+      "attacker_model": "looks for value-transfer paths that can be drained repeatedly",
+      "pressure": "profit",
+      "trace_turn": 70,
+      "finding": "non_atomic_value_transfer",
+      "strategy_family": "drain_repetition",
+      "strategy_fingerprint": "a6f1fcbedf1626b8",
+      "fitness": {
+        "attacker": 0.91,
+        "defender": 0.36,
+        "sigma": 0.78
+      },
+      "observed_lines": {
+        "balance_guard": [
+          2
+        ],
+        "state_mutation": [
+          3,
+          4
+        ],
+        "amount_validation": [],
+        "atomic_boundary": []
+      },
+      "rationale": "check-then-write transfer can be repeated before balances settle",
+      "vote_source": "simulation_trace.turns"
+    },
+    {
+      "universe_id": 1,
+      "name": "Race-Condition Hunter",
+      "dna": "stealthy",
+      "attacker_model": "looks for check-then-write interleavings and stale guards",
+      "pressure": "concurrency",
+      "trace_turn": 71,
+      "finding": "non_atomic_value_transfer",
+      "strategy_family": "race_window",
+      "strategy_fingerprint": "a9472ba3194f455d",
+      "fitness": {
+        "attacker": 0.88,
+        "defender": 0.41,
+        "sigma": 0.74
+      },
+      "observed_lines": {
+        "balance_guard": [
+          2
+        ],
+        "state_mutation": [
+          3,
+          4
+        ],
+        "amount_validation": [],
+        "atomic_boundary": []
+      },
+      "rationale": "guard and mutation are not protected by a transaction or lock",
+      "vote_source": "simulation_trace.turns"
+    },
+    {
+      "universe_id": 2,
+      "name": "Invariant Breaker",
+      "dna": "adaptive",
+      "attacker_model": "looks for invalid values that invert balance or authorization logic",
+      "pressure": "type-and-range abuse",
+      "trace_turn": 72,
+      "finding": "invalid_amount_transfer",
+      "strategy_family": "range_inversion",
+      "strategy_fingerprint": "f60d088a0eb4d80f",
+      "fitness": {
+        "attacker": 0.76,
+        "defender": 0.52,
+        "sigma": 0.67
+      },
+      "observed_lines": {
+        "balance_guard": [
+          2
+        ],
+        "state_mutation": [
+          3,
+          4
+        ],
+        "amount_validation": [],
+        "atomic_boundary": []
+      },
+      "rationale": "negative, NaN, or infinite amount can invert expected balance movement",
+      "vote_source": "simulation_trace.turns"
+    },
+    {
+      "universe_id": 3,
+      "name": "Insider Mutator",
+      "dna": "aggressive",
+      "attacker_model": "looks for direct state mutation without an authority boundary",
+      "pressure": "privileged misuse",
+      "trace_turn": 73,
+      "finding": "direct_authority_mutation",
+      "strategy_family": "authority_bypass",
+      "strategy_fingerprint": "a68eb25dd5765d3d",
+      "fitness": {
+        "attacker": 0.73,
+        "defender": 0.55,
+        "sigma": 0.62
+      },
+      "observed_lines": {
+        "balance_guard": [
+          2
+        ],
+        "state_mutation": [
+          3,
+          4
+        ],
+        "amount_validation": [],
+        "atomic_boundary": []
+      },
+      "rationale": "caller can mutate account-like objects without an explicit authority boundary",
+      "vote_source": "simulation_trace.turns"
+    },
+    {
+      "universe_id": 4,
+      "name": "Regression Fossilizer",
+      "dna": "stealthy",
+      "attacker_model": "looks for patterns that should become reusable lint rules",
+      "pressure": "prevent recurrence",
+      "trace_turn": 74,
+      "finding": "non_atomic_value_transfer",
+      "strategy_family": "lint_fossil",
+      "strategy_fingerprint": "e52fc2ecaca4a6c1",
+      "fitness": {
+        "attacker": 0.86,
+        "defender": 0.44,
+        "sigma": 0.71
+      },
+      "observed_lines": {
+        "balance_guard": [
+          2
+        ],
+        "state_mutation": [
+          3,
+          4
+        ],
+        "amount_validation": [],
+        "atomic_boundary": []
+      },
+      "rationale": "pattern is reusable enough to fossilize as a lint rule",
+      "vote_source": "simulation_trace.turns"
+    }
+  ],
+  "invariant": "A finding is certifiable only when at least 3 independent universe profiles arrive at the same vulnerability family.",
+  "recommended_patch_strategy": "Validate amount, move balance changes into a transaction/lock, and preserve the pattern as an ESLint rule.",
+  "eslint_rule_skeleton": "module.exports = {\n  meta: {\n    type: \"problem\",\n    docs: {\n      description: \"flag non-atomic value transfers with balance guards and split mutations\"\n    },\n    schema: []\n  },\n  create(context) {\n    return {\n      IfStatement(node) {\n        const source = context.getSourceCode().getText(node);\n        const hasBalanceGuard = /balance\\s*>=\\s*amount/i.test(source);\n        const hasSplitMutation = /balance\\s*[+-]=/i.test(source);\n        const hasAtomicBoundary = /transaction|getForUpdate|mutex|lock/i.test(source);\n        if (hasBalanceGuard && hasSplitMutation && !hasAtomicBoundary) {\n          context.report({\n            node,\n            message: \"Shadow-Omega convergence: protect value transfer with a transaction or lock.\"\n          });\n        }\n      }\n    };\n  }\n};"
+}
