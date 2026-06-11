@@ -39,7 +39,8 @@ Shadow-Ω turns GitHub Copilot into a multiverse security design partner. A deve
 
 ### Demo Video or Screenshots
 
-https://youtu.be/i37Xn0-GrPk
+- Architecture demo (2:17): https://youtu.be/i37Xn0-GrPk
+- Copilot convergence certificate demo (1:51): https://youtu.be/HMq6hyqLzb8
 
 ### Primary Programming Language
 

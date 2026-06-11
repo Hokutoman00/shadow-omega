@@ -4,7 +4,10 @@
 
 Built for **Microsoft Agents League 2026** — powered by Microsoft AutoGen v0.4 + Azure AI Foundry / GitHub Models.
 
-🎬 **Demo video (2:17):** https://youtu.be/i37Xn0-GrPk
+🎬 **Demo videos:**
+
+- **Architecture demo (2:17):** https://youtu.be/i37Xn0-GrPk
+- **Copilot convergence certificate demo (1:51):** https://youtu.be/HMq6hyqLzb8
 
 ![Mid-Stage — 5-universe ledger](screenshots/02-midstage-universe-ledger.png)
 
@@ -106,7 +109,7 @@ COPILOT_USAGE.md        Copilot / MCP usage and verification record
 ## Key Numbers
 
 - 200 agents across 5 universes at 0.4 s/turn — LLM councils fire every 10 turns, making real-time demos affordable
-- Convergence confidence at 3/5 universes: **97%+** (`1 − (1/5)²`)
+- Convergence confidence at 3/5 universes: **96%** (`1 − (1/5)²`)
 - Edge-of-chaos control keeps each universe at σ ≈ 1.0 (Information Bottleneck loss < 0.30)
 
 ## License
