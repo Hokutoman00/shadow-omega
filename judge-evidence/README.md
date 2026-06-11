@@ -4,7 +4,7 @@ This folder contains sanitized evidence for the Shadow-Omega Creative Apps submi
 
 ## Files
 
-- `copilot-cli-mcp-evidence.json` - sanitized Copilot CLI MCP evidence. It records MCP server loading and tool calls without raw model reasoning logs.
+- `copilot-cli-mcp-evidence.json` - sanitized transcription of an observed Copilot CLI MCP run. It records MCP server loading and tool calls without raw model reasoning logs; the generator preserves this observation and does not replay `gh copilot`.
 - `convergence-trace-risky-transfer.json` - five-universe deterministic trace for the risky transfer fixture.
 - `certificate-risky-transfer.json` - MCP certificate output derived from the trace.
 - `closed-loop-risky-transfer.json` - discover -> patch -> re-audit loop proof.

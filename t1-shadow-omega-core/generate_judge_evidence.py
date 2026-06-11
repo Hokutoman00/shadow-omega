@@ -2,8 +2,10 @@
 Generate sanitized judge evidence for the Shadow-Omega Creative Apps submission.
 
 The generated files intentionally exclude raw Copilot JSONL logs because those
-logs can contain model reasoning events. Only tool names, MCP server status,
-success flags, and final user-visible summaries are persisted.
+logs can contain model reasoning events. The Copilot CLI file is a sanitized
+transcription of an observed run; this generator preserves that disclosure and
+does not replay `gh copilot`. Only tool names, MCP server status, success flags,
+and final user-visible summaries are persisted.
 """
 
 from __future__ import annotations
@@ -61,8 +63,20 @@ def _copilot_evidence(source_code: str) -> dict[str, Any]:
     return {
         "schema": "shadow-omega.copilot-cli-mcp-evidence.v1",
         "observed_at": "2026-06-11T20:34:21+09:00",
+        "evidence_kind": "sanitized_transcription_of_observed_copilot_cli_run",
+        "observation_method": (
+            "Live Copilot CLI run observed locally, then manually reduced to "
+            "server names, tool names, public result fields, and success flags."
+        ),
+        "regeneration_scope": (
+            "generate_judge_evidence.py reproduces this sanitized evidence file "
+            "from the recorded observation; it does not replay Copilot CLI."
+        ),
         "raw_logs_committed": False,
-        "reason": "Raw Copilot JSONL contains reasoning events; this file keeps only sanitized tool-call evidence.",
+        "reason": (
+            "Raw Copilot JSONL contains reasoning events; this file keeps only "
+            "a sanitized observation transcript of tool-call evidence."
+        ),
         "mcp_config_recognition": {
             "command": "gh copilot -- mcp get shadow-omega-auditor --json",
             "server": "shadow-omega-auditor",
@@ -120,6 +134,7 @@ def _copilot_evidence(source_code: str) -> dict[str, Any]:
         "reproduction_notes": [
             "Wrap .mcp.json under a top-level mcpServers object when passing --additional-mcp-config.",
             "Use --allow-tool='shadow-omega-auditor' so Copilot CLI can call the local MCP server non-interactively.",
+            "This JSON is a sanitized transcription, not a raw log export and not a replay harness.",
             "Do not commit raw JSONL; sanitize to tool names, status, and public outputs.",
         ],
     }
@@ -180,7 +195,7 @@ This folder contains sanitized evidence for the Shadow-Omega Creative Apps submi
 
 ## Files
 
-- `copilot-cli-mcp-evidence.json` - sanitized Copilot CLI MCP evidence. It records MCP server loading and tool calls without raw model reasoning logs.
+- `copilot-cli-mcp-evidence.json` - sanitized transcription of an observed Copilot CLI MCP run. It records MCP server loading and tool calls without raw model reasoning logs; the generator preserves this observation and does not replay `gh copilot`.
 - `convergence-trace-risky-transfer.json` - five-universe deterministic trace for the risky transfer fixture.
 - `certificate-risky-transfer.json` - MCP certificate output derived from the trace.
 - `closed-loop-risky-transfer.json` - discover -> patch -> re-audit loop proof.
