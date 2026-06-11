@@ -1,0 +1,10 @@
+{
+  "status": "converged",
+  "finding": "non_atomic_value_transfer",
+  "converged_universes": 3,
+  "confidence": 0.96,
+  "confidence_formula": "1 - (1/N)^(k-1)",
+  "closed_loop_result": "mitigated",
+  "after_patch_status": "not_converged",
+  "interpretation": "Three independent universe profiles converge on the same non-atomic value-transfer family. The guarded transaction patch breaks that convergence."
+}

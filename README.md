@@ -63,7 +63,24 @@ The repository includes three MCP entry points:
 - [.github/mcp.json](.github/mcp.json) — GitHub workspace config fallback
 - [.vscode/mcp.json](.vscode/mcp.json) — VS Code Copilot Agent Mode config
 
-The server exposes `get_shadow_omega_brief`, `audit_code`, `get_multiverse_status`, and `export_eslint_rules`. Usage details and verification output live in [COPILOT_USAGE.md](COPILOT_USAGE.md).
+The server exposes `get_shadow_omega_brief`, `audit_code`, `generate_convergence_certificate`, `run_closed_loop_demo`, `get_multiverse_status`, and `export_eslint_rules`. Usage details and verification output live in [COPILOT_USAGE.md](COPILOT_USAGE.md).
+
+## Convergence Certificate
+
+Shadow-Ω's differentiator is not "another AI review." It requires independent adversarial universes to converge before a finding becomes actionable. Judges can inspect that claim directly:
+
+```bash
+python t1-shadow-omega-core/verify_mcp_server.py
+```
+
+For the risky transfer fixture, the MCP server returns a certificate with:
+
+- attack-surface map: balance guard, split mutation, missing amount validation, missing atomic boundary
+- 5 universe votes from different attacker models
+- certifiable convergence when 3+ universes agree on the same finding family
+- confidence formula `1 - (1/N)^(k-1)`
+- ESLint rule skeleton
+- closed-loop result: discover -> guarded patch -> re-audit -> reusable rule
 
 ## Repository Layout
 

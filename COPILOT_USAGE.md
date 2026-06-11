@@ -21,6 +21,8 @@ Server:
 
 - `get_shadow_omega_brief` - explains the creative developer workflow.
 - `audit_code` - sends selected source code to the Shadow-Omega backend for AST entropy and multiverse audit analysis.
+- `generate_convergence_certificate` - returns attack-surface map, universe votes, confidence, and ESLint rule skeleton.
+- `run_closed_loop_demo` - demonstrates discover -> patch -> re-audit -> rule-export.
 - `get_multiverse_status` - returns current universe, sigma, convergence, and cascade state.
 - `export_eslint_rules` - exports converged vulnerability archetypes as ESLint rule skeletons.
 
@@ -44,7 +46,9 @@ Observed result:
     "get_shadow_omega_brief"
   ],
   "brief_ok": true,
-  "audit_response_ok": true
+  "audit_response_ok": true,
+  "certificate_ok": true,
+  "closed_loop_ok": true
 }
 ```
 
@@ -102,12 +106,13 @@ Observed result:
 4. Ask Copilot Agent Mode:
 
    ```text
-   Use the shadow-omega-auditor MCP server to audit this selected JavaScript function.
-   Then explain any converged vulnerability archetypes and draft an ESLint rule.
+   Use the shadow-omega-auditor MCP server on this selected JavaScript function.
+   First generate a convergence certificate, then run the closed-loop demo.
+   Apply the guarded patch only if the after-patch certificate is not_converged.
    ```
 
 5. Copilot can call the MCP tools while the developer remains inside the editor.
 
 ## Creative Apps Fit
 
-The Creative Apps track asks for innovative applications built with GitHub Copilot and welcomes MCP server integrations. Shadow-Omega turns Copilot into a multiverse security design partner: the developer selects code, Copilot calls the MCP auditor, and the result becomes both an interactive creative simulation and a practical lint-rule draft.
+The Creative Apps track asks for innovative applications built with GitHub Copilot and welcomes MCP server integrations. Shadow-Omega turns Copilot into a multiverse security design partner: the developer selects code, Copilot calls the MCP auditor, and the result becomes a certificate, a guarded patch, a re-audit result, and a practical lint-rule draft.

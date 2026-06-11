@@ -204,6 +204,8 @@ python t1-shadow-omega-core/verify_mcp_server.py
 
 The root `.mcp.json` registers `shadow-omega-auditor` as a stdio MCP server for Copilot CLI. The root `.vscode/mcp.json` registers the same server for VS Code Copilot Agent Mode. Copilot can call `audit_code`, `get_multiverse_status`, and `export_eslint_rules` to turn selected source code into multiverse audit signals and ESLint rule drafts.
 
+For judge-repeatable proof without starting the live backend, Copilot can call `generate_convergence_certificate` and `run_closed_loop_demo`. These tools return the attack-surface map, independent universe votes, confidence score, guarded patch, after-patch re-audit result, and ESLint skeleton for the fixture in `demo/fixtures/risky-transfer.js`.
+
 ### Frontend
 
 ```bash

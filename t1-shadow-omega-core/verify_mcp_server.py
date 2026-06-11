@@ -35,6 +35,8 @@ async def main() -> None:
             expected = {
                 "get_shadow_omega_brief",
                 "audit_code",
+                "generate_convergence_certificate",
+                "run_closed_loop_demo",
                 "get_multiverse_status",
                 "export_eslint_rules",
             }
@@ -53,6 +55,26 @@ async def main() -> None:
                     )
                 },
             )
+            certificate = await session.call_tool(
+                "generate_convergence_certificate",
+                {
+                    "source_code": (
+                        "function transfer(user, target, amount) { "
+                        "if (user.balance >= amount) { target.balance += amount; "
+                        "user.balance -= amount; } }"
+                    )
+                },
+            )
+            loop = await session.call_tool(
+                "run_closed_loop_demo",
+                {
+                    "source_code": (
+                        "function transfer(user, target, amount) { "
+                        "if (user.balance >= amount) { target.balance += amount; "
+                        "user.balance -= amount; } }"
+                    )
+                },
+            )
 
             print(
                 json.dumps(
@@ -61,6 +83,8 @@ async def main() -> None:
                         "tools": names,
                         "brief_ok": bool(brief.content),
                         "audit_response_ok": bool(audit.content),
+                        "certificate_ok": bool(certificate.content),
+                        "closed_loop_ok": bool(loop.content),
                     },
                     indent=2,
                 )
