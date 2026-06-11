@@ -2,6 +2,8 @@
 
 Shadow-Omega includes Copilot-facing MCP configuration so the auditor can be used from GitHub Copilot workflows.
 
+Final Copilot convergence certificate demo: https://youtu.be/HMq6hyqLzb8
+
 ## MCP Configuration
 
 | Target | File | Purpose |
@@ -42,8 +44,10 @@ Observed result:
   "tools": [
     "audit_code",
     "export_eslint_rules",
+    "generate_convergence_certificate",
     "get_multiverse_status",
-    "get_shadow_omega_brief"
+    "get_shadow_omega_brief",
+    "run_closed_loop_demo"
   ],
   "brief_ok": true,
   "audit_response_ok": true,
