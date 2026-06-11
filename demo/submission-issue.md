@@ -33,8 +33,9 @@ Shadow-Ω turns GitHub Copilot into a multiverse security design partner. A deve
 3. **Mid-stage** - 5 parallel universes run 20 islands of attacker/defender agents each, evolving independently through mutation, fitness selection, and Dark Market strategy trading
 4. **Strategic layer** - Microsoft AutoGen v0.4 fires an agent council every 10 turns through Azure AI Foundry or GitHub Models, with deterministic physics fallback for zero-credential demos
 5. **Post-stage** - When 3+ universes converge on the same strategy fingerprint, a LIVE THREAT event fires and the Fossil Record exports an ESLint rule skeleton
+6. **Closed-loop safety** - Copilot can request a convergence certificate, apply a guarded patch, re-audit the patched code, and preserve the pattern as a reusable lint rule
 
-**Key innovation:** Copilot is no longer only a code generator. Through MCP, it becomes the front door to an interactive adversarial simulation that discovers new lint-rule ideas by multiverse consensus.
+**Key innovation:** Copilot is no longer only a code generator. Through MCP, it becomes the front door to an interactive adversarial simulation that discovers new lint-rule ideas by multiverse consensus, then verifies that the proposed fix breaks convergence.
 
 ### Demo Video or Screenshots
 
@@ -101,6 +102,8 @@ Copilot usage record: https://github.com/Hokutoman00/shadow-omega/blob/main/COPI
 
 - **Copilot-native MCP workflow**: GitHub Copilot can discover `shadow-omega-auditor` as a workspace MCP server and route selected code to multiverse audit tools
 - **Judge-repeatable verification**: `verify_mcp_server.py` uses the real MCP stdio protocol to list tools and call `audit_code`
+- **Convergence Certificate**: `generate_convergence_certificate` returns attack-surface map, universe votes, confidence, strategy fingerprint, and ESLint rule skeleton
+- **Closed-loop demo**: `run_closed_loop_demo` shows discover -> guarded patch -> re-audit -> reusable rule
 - **Creative developer experience**: The app combines editor-native Copilot interaction with a cinematic 3D dashboard, live universes, threat banners, and ESLint archetype output
 - **Two-layer architecture**: AutoGen councils run every 10 turns while the physics simulation runs at 0.4s/turn across 200 agents
 - **5-universe independence**: A vulnerability discovered by 3+ independently evolved universes has survived diverse evolutionary pressure

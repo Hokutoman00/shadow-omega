@@ -16,6 +16,11 @@ import urllib.error
 import urllib.request
 from typing import Any
 
+from convergence_certificate import (
+    build_closed_loop_demo,
+    build_convergence_certificate,
+    dumps as dumps_certificate,
+)
 from mcp.server.fastmcp import FastMCP
 
 # ── Configuration ──────────────────────────────────────────────────────────
@@ -96,6 +101,8 @@ def get_shadow_omega_brief() -> str:
             ),
             "recommended_flow": [
                 "Call audit_code(source_code) with the risky file or selected snippet.",
+                "Call generate_convergence_certificate(source_code) to see which universes converged.",
+                "Call run_closed_loop_demo(source_code) to get a patch and re-audit proof.",
                 "Call get_multiverse_status() to inspect convergence, sigma, and cascade state.",
                 "Call export_eslint_rules() to turn discovered archetypes into lint-rule drafts.",
             ],
@@ -135,6 +142,40 @@ def audit_code(source_code: str) -> str:
         return json.dumps({"error": result["error"]})
 
     return json.dumps(result, ensure_ascii=False)
+
+
+@mcp.tool()
+def generate_convergence_certificate(source_code: str) -> str:
+    """
+    Generate a judge-repeatable convergence certificate for selected code.
+
+    This deterministic certificate makes Shadow-Omega's core claim inspectable:
+    at least 3 independent adversarial universe profiles must converge on the
+    same vulnerability family before the finding is treated as certifiable.
+
+    Args:
+        source_code: Source code string to certify
+
+    Returns:
+        JSON string containing attack-surface map, universe votes, confidence,
+        strategy fingerprint, and ESLint rule skeleton when converged
+    """
+    return dumps_certificate(build_convergence_certificate(source_code))
+
+
+@mcp.tool()
+def run_closed_loop_demo(source_code: str) -> str:
+    """
+    Demonstrate the Copilot safety loop: discover, patch, re-audit, rule-export.
+
+    Args:
+        source_code: Source code string to run through the closed-loop demo
+
+    Returns:
+        JSON string containing the initial convergence certificate, patch
+        suggestion, after-patch certificate, and loop result
+    """
+    return dumps_certificate(build_closed_loop_demo(source_code))
 
 
 @mcp.tool()
