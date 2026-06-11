@@ -193,6 +193,17 @@ pip install -r requirements.txt
 uvicorn main:app --port 8090 --reload
 ```
 
+### GitHub Copilot MCP Server
+
+From the repository root:
+
+```bash
+gh copilot -- mcp get shadow-omega-auditor --json
+python t1-shadow-omega-core/verify_mcp_server.py
+```
+
+The root `.mcp.json` registers `shadow-omega-auditor` as a stdio MCP server for Copilot CLI. The root `.vscode/mcp.json` registers the same server for VS Code Copilot Agent Mode. Copilot can call `audit_code`, `get_multiverse_status`, and `export_eslint_rules` to turn selected source code into multiverse audit signals and ESLint rule drafts.
+
 ### Frontend
 
 ```bash

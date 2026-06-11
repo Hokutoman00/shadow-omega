@@ -43,7 +43,27 @@ npm install && npm run dev
 # → http://localhost:5173 → click INITIATE MULTIVERSE
 ```
 
-To enable the AutoGen + LLM strategic layer, copy [t1-shadow-omega-core/.env.example](t1-shadow-omega-core/.env.example) to `.env` and set either `GITHUB_TOKEN` (GitHub Models — any free PAT works) or `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_KEY` (Azure AI Foundry).
+To enable the AutoGen + LLM strategic layer, copy [t1-shadow-omega-core/.env.example](t1-shadow-omega-core/.env.example) to `.env` and fill either the GitHub Models values or the Azure AI Foundry values described there.
+
+## GitHub Copilot + MCP Creative Workflow
+
+Shadow-Ω also ships as a **GitHub Copilot MCP server** for the Agents League Creative Apps track. Copilot can call the auditor from VS Code or Copilot CLI while the developer stays inside the coding workflow.
+
+```bash
+# Confirm Copilot sees the workspace MCP server
+gh copilot -- mcp get shadow-omega-auditor --json
+
+# Smoke-test the actual MCP stdio protocol
+python t1-shadow-omega-core/verify_mcp_server.py
+```
+
+The repository includes three MCP entry points:
+
+- [.mcp.json](.mcp.json) — Copilot CLI workspace config
+- [.github/mcp.json](.github/mcp.json) — GitHub workspace config fallback
+- [.vscode/mcp.json](.vscode/mcp.json) — VS Code Copilot Agent Mode config
+
+The server exposes `get_shadow_omega_brief`, `audit_code`, `get_multiverse_status`, and `export_eslint_rules`. Usage details and verification output live in [COPILOT_USAGE.md](COPILOT_USAGE.md).
 
 ## Repository Layout
 
@@ -53,6 +73,9 @@ t1-shadow-omega-core/   Python 3.11 backend — simulation engine, AutoGen counc
 t1-agents-league-ui/    React 18 + Vite frontend — 3D AST graph, multiverse grid,
                         sigma gauges, Dark Market ledger, VSCode alert mockup
 screenshots/            UI captures (see screenshots/README.md)
+.mcp.json               Copilot CLI workspace MCP server config
+.vscode/mcp.json        VS Code Copilot Agent Mode MCP server config
+COPILOT_USAGE.md        Copilot / MCP usage and verification record
 ```
 
 ## Tech Stack
