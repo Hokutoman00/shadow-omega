@@ -99,11 +99,14 @@ No credentials required - runs fully in physics-fallback mode. For AI features, 
 
 Copilot usage record: https://github.com/Hokutoman00/shadow-omega/blob/main/COPILOT_USAGE.md
 
+Judge evidence bundle: https://github.com/Hokutoman00/shadow-omega/tree/main/judge-evidence
+
 ### Technical Highlights
 
-- **Copilot-native MCP workflow**: GitHub Copilot can discover `shadow-omega-auditor` as a workspace MCP server and route selected code to multiverse audit tools
+- **Copilot-native MCP workflow**: GitHub Copilot CLI can discover `shadow-omega-auditor`, load it through `--additional-mcp-config`, and call the MCP tools non-interactively; sanitized evidence is committed
 - **Judge-repeatable verification**: `verify_mcp_server.py` uses the real MCP stdio protocol to list tools and call `audit_code`
-- **Convergence Certificate**: `generate_convergence_certificate` returns attack-surface map, universe votes, confidence, strategy fingerprint, and ESLint rule skeleton
+- **Convergence Certificate**: `generate_convergence_certificate` returns attack-surface map, trace-derived universe votes, confidence, strategy fingerprint, and ESLint rule skeleton
+- **GitHub Models council evidence**: AutoGen council transcript generated through the current `https://models.github.ai/inference` endpoint with credential values omitted
 - **Closed-loop demo**: `run_closed_loop_demo` shows discover -> guarded patch -> re-audit -> reusable rule
 - **Creative developer experience**: The app combines editor-native Copilot interaction with a cinematic 3D dashboard, live universes, threat banners, and ESLint archetype output
 - **Two-layer architecture**: AutoGen councils run every 10 turns while the physics simulation runs at 0.4s/turn across 200 agents

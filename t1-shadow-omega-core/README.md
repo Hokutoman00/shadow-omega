@@ -36,7 +36,7 @@ graph TD
 
     subgraph FOUNDRY["Microsoft AI Infrastructure"]
         AZF["Azure AI Foundry\nPriority 1 — AzureOpenAIChatCompletionClient"]
-        GHM["GitHub Models\nPriority 2 — OpenAIChatCompletionClient\nmodels.inference.ai.azure.com"]
+        GHM["GitHub Models\nPriority 2 — OpenAIChatCompletionClient\nmodels.github.ai/inference"]
         PHY["Physics Fallback\nzero-credential operation"]
     end
 
@@ -144,7 +144,7 @@ Shadow-Ω is built on the **Reasoning Agents** track: all strategic intelligence
 | `defender_u0..4` | `AssistantAgent` | Counter-propose defensive configuration |
 | `convergence_orchestrator` | `AssistantAgent` | Detect semantic equivalence across 5 universes |
 
-Agents use `AzureOpenAIChatCompletionClient` (Azure AI Foundry) or `OpenAIChatCompletionClient` (GitHub Models) via Microsoft AI infrastructure. Priority resolution: **Azure AI Foundry → GitHub Models → physics-deterministic fallback**. The system runs fully without any credentials.
+Agents use `AzureOpenAIChatCompletionClient` (Azure AI Foundry) or `OpenAIChatCompletionClient` (GitHub Models) via Microsoft AI infrastructure. GitHub Models defaults to the current `https://models.github.ai/inference` endpoint and can be overridden with `GITHUB_MODELS_BASE_URL`. Priority resolution: **Azure AI Foundry → GitHub Models → physics-deterministic fallback**. The system runs fully without any credentials.
 
 ## Agent Design (Multi-Agent Protocol)
 
@@ -204,7 +204,9 @@ python t1-shadow-omega-core/verify_mcp_server.py
 
 The root `.mcp.json` registers `shadow-omega-auditor` as a stdio MCP server for Copilot CLI. The root `.vscode/mcp.json` registers the same server for VS Code Copilot Agent Mode. Copilot can call `audit_code`, `get_multiverse_status`, and `export_eslint_rules` to turn selected source code into multiverse audit signals and ESLint rule drafts.
 
-For judge-repeatable proof without starting the live backend, Copilot can call `generate_convergence_certificate` and `run_closed_loop_demo`. These tools return the attack-surface map, independent universe votes, confidence score, guarded patch, after-patch re-audit result, and ESLint skeleton for the fixture in `demo/fixtures/risky-transfer.js`.
+For judge-repeatable proof without starting the live backend, Copilot can call `generate_convergence_certificate` and `run_closed_loop_demo`. These tools return the attack-surface map, trace-derived independent universe votes, confidence score, guarded patch, after-patch re-audit result, and ESLint skeleton for the fixture in `demo/fixtures/risky-transfer.js`.
+
+The repository also includes a sanitized judge evidence bundle in `judge-evidence/`: Copilot CLI MCP tool-call evidence, `simulation_trace_hybrid` certificate output, closed-loop re-audit output, and a GitHub Models AutoGen council transcript generated through `https://models.github.ai/inference` with credential values omitted.
 
 ### Frontend
 
@@ -234,7 +236,8 @@ Shadow-Ω supports two credential options (or runs without any credentials):
 cp t1-shadow-omega-core/.env.example t1-shadow-omega-core/.env
 # Edit .env: set GITHUB_TOKEN to a GitHub Personal Access Token
 # Generate at: github.com/settings/tokens → Generate new token (classic)
-# No special scopes required — any valid PAT works
+# Use GITHUB_MODEL=openai/gpt-4o-mini and GITHUB_MODELS_BASE_URL=https://models.github.ai/inference
+# Fine-grained PATs / GitHub App tokens require models:read
 ```
 
 **Option B — Azure AI Foundry (production / Reasoning Agents track full compliance):**

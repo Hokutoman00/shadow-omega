@@ -1,0 +1,62 @@
+{
+  "schema": "shadow-omega.copilot-cli-mcp-evidence.v1",
+  "observed_at": "2026-06-11T20:34:21+09:00",
+  "raw_logs_committed": false,
+  "reason": "Raw Copilot JSONL contains reasoning events; this file keeps only sanitized tool-call evidence.",
+  "mcp_config_recognition": {
+    "command": "gh copilot -- mcp get shadow-omega-auditor --json",
+    "server": "shadow-omega-auditor",
+    "source": "workspace",
+    "sourcePath": "C:\\tmp\\shadow-omega-release\\.mcp.json",
+    "transport": "stdio",
+    "command_under_test": "python t1-shadow-omega-core/mcp_server.py",
+    "recognized": true
+  },
+  "copilot_cli_runtime": {
+    "command_shape": "gh copilot -- --additional-mcp-config @<mcp-wrapper.json> --allow-tool='shadow-omega-auditor' -p <prompt>",
+    "mcp_servers_loaded": [
+      {
+        "name": "shadow-omega-auditor",
+        "status": "connected",
+        "transport": "stdio"
+      },
+      {
+        "name": "github-mcp-server",
+        "status": "connected",
+        "source": "builtin",
+        "transport": "http"
+      }
+    ],
+    "tool_requests": [
+      {
+        "tool": "get_shadow_omega_brief",
+        "mcpServerName": "shadow-omega-auditor",
+        "success": true
+      },
+      {
+        "tool": "generate_convergence_certificate",
+        "mcpServerName": "shadow-omega-auditor",
+        "source_sha256": "22f0807a1ac8c721fb33efc444862749d2742ae050b757e61261031e2e05176c",
+        "success": true
+      },
+      {
+        "tool": "run_closed_loop_demo",
+        "mcpServerName": "shadow-omega-auditor",
+        "source_sha256": "22f0807a1ac8c721fb33efc444862749d2742ae050b757e61261031e2e05176c",
+        "success": true
+      }
+    ],
+    "assistant_visible_summary": {
+      "certificate_status": "converged",
+      "finding": "non_atomic_value_transfer",
+      "converged_universes": 3,
+      "closed_loop_result": "mitigated",
+      "after_patch_status": "not_converged"
+    }
+  },
+  "reproduction_notes": [
+    "Wrap .mcp.json under a top-level mcpServers object when passing --additional-mcp-config.",
+    "Use --allow-tool='shadow-omega-auditor' so Copilot CLI can call the local MCP server non-interactively.",
+    "Do not commit raw JSONL; sanitize to tool names, status, and public outputs."
+  ]
+}

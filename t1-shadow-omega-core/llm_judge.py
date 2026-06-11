@@ -13,7 +13,8 @@ Required env vars (optional — falls back to physics if absent):
     AZURE_OPENAI_DEPLOYMENT — deployment name (default: gpt-4o-mini)
   Priority 2 — GitHub Models (free with any GitHub account):
     GITHUB_TOKEN           — GitHub personal access token
-    GITHUB_MODEL           — model name (default: gpt-4o-mini)
+    GITHUB_MODEL           — model name (default: openai/gpt-4o-mini)
+    GITHUB_MODELS_BASE_URL — endpoint (default: https://models.github.ai/inference)
 """
 import hashlib
 import json
@@ -79,9 +80,13 @@ def _init_api() -> bool:
     if gh_token:
         try:
             from openai import OpenAI
-            model = os.getenv("GITHUB_MODEL", "gpt-4o-mini")
+            model = os.getenv("GITHUB_MODEL", "openai/gpt-4o-mini")
+            base_url = os.getenv(
+                "GITHUB_MODELS_BASE_URL",
+                "https://models.github.ai/inference",
+            )
             _api_client = OpenAI(
-                base_url="https://models.inference.ai.azure.com",
+                base_url=base_url,
                 api_key=gh_token,
                 default_headers={"x-ms-useragent": "shadow-omega/1.0"},
             )
@@ -99,7 +104,7 @@ def _call_azure(attacker: dict, defender: dict, environment: str) -> dict:
     """Call Azure OpenAI to adjudicate. Returns {success, margin, reasoning}.
     Raises on rate-limit errors so the caller does NOT cache the result.
     """
-    deployment = getattr(_api_client, "_deployment", "gpt-4o-mini")
+    deployment = getattr(_api_client, "_deployment", "openai/gpt-4o-mini")
     prompt = (
         "You are adjudicating a cybersecurity simulation battle.\n\n"
         f"ATTACKER: {json.dumps(attacker)}\n"

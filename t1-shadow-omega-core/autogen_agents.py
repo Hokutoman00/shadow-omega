@@ -20,7 +20,8 @@ Required env vars (optional — falls back to physics if absent):
     AZURE_OPENAI_DEPLOYMENT — deployment name (default: gpt-4o-mini)
   Priority 2 — GitHub Models (free with any GitHub account):
     GITHUB_TOKEN           — GitHub personal access token
-    GITHUB_MODEL           — model name (default: gpt-4o-mini)
+    GITHUB_MODEL           — model name (default: openai/gpt-4o-mini)
+    GITHUB_MODELS_BASE_URL — endpoint (default: https://models.github.ai/inference)
 """
 import hashlib
 import json
@@ -39,16 +40,16 @@ COUNCIL_INTERVAL = 10  # run AutoGen councils every N simulation turns
 
 _DNA_PERSONAS = {
     "aggressive": (
-        "You are a high-tempo cyber attacker. Favor high-frequency, high-visibility attacks. "
-        "Maximize immediate damage even at the cost of detection probability."
+        "You are a high-tempo secure-code risk reviewer. Favor quickly surfacing "
+        "high-impact risk hypotheses so the defender can close them early."
     ),
     "stealthy": (
-        "You are a persistent, low-noise cyber attacker. Prioritize evasion and long-term "
-        "foothold over burst damage. Patience is your primary weapon."
+        "You are a low-noise secure-code risk reviewer. Prioritize subtle logic paths "
+        "that need careful defensive review over obvious failures."
     ),
     "adaptive": (
-        "You are a mirroring cyber attacker. Analyze defender behavior patterns and "
-        "precisely counter their last observed defense strategy. Exploit predictability."
+        "You are an adaptive secure-code risk reviewer. Analyze defender behavior "
+        "patterns and select risk hypotheses that reveal blind spots."
     ),
 }
 
@@ -70,6 +71,20 @@ _DNA_MAP = {0: "aggressive", 1: "stealthy", 2: "adaptive", 3: "aggressive", 4: "
 
 # ── Azure AI Foundry client factory ──────────────────────────────────────────
 
+def _github_model_info(model: str) -> dict:
+    """AutoGen 0.7 requires model_info for provider/model GitHub Models IDs."""
+    from autogen_core.models import ModelFamily
+
+    family = ModelFamily.GPT_41 if "gpt-4.1" in model else ModelFamily.GPT_4O
+    return {
+        "vision": False,
+        "function_calling": True,
+        "json_output": True,
+        "family": family,
+        "structured_output": True,
+    }
+
+
 def _make_azure_client():
     """Create AutoGen model client. Priority 1: Azure AI Foundry. Priority 2: GitHub Models."""
     # Priority 1: Azure AI Foundry
@@ -86,7 +101,7 @@ def _make_azure_client():
                 azure_endpoint=endpoint,
                 api_key=key,
             )
-        except ImportError:
+        except Exception:
             pass
 
     # Priority 2: GitHub Models (free, Microsoft AI infrastructure)
@@ -94,13 +109,18 @@ def _make_azure_client():
     if gh_token:
         try:
             from autogen_ext.models.openai import OpenAIChatCompletionClient
-            model = os.getenv("GITHUB_MODEL", "gpt-4o-mini")
+            model = os.getenv("GITHUB_MODEL", "openai/gpt-4o-mini")
+            base_url = os.getenv(
+                "GITHUB_MODELS_BASE_URL",
+                "https://models.github.ai/inference",
+            )
             return OpenAIChatCompletionClient(
                 model=model,
-                base_url="https://models.inference.ai.azure.com",
+                base_url=base_url,
                 api_key=gh_token,
+                model_info=_github_model_info(model),
             )
-        except ImportError:
+        except Exception:
             pass
 
     return None
@@ -144,15 +164,15 @@ class UniverseAgentCouncil:
                 name=f"attacker_u{universe_id}",
                 model_client=self._client,
                 system_message=(
-                    f"You are a cybersecurity attacker in simulation universe {universe_id} "
+                    f"You are a secure-code risk reviewer in simulation universe {universe_id} "
                     f"(DNA trait: {dna_trait.upper()}).\n"
                     f"{persona}\n\n"
-                    "Given the current simulation state, propose the next evolved attack strategy.\n\n"
+                    "Given the current simulation state, propose the next defensive risk hypothesis.\n\n"
                     "Respond ONLY with a single-line JSON object — no markdown, no prose:\n"
-                    '{"attack_style": "LATERAL|PHISHING|EXPLOIT|SUPPLY_CHAIN|ZERO_DAY", '
+                    '{"attack_style": "ACCESS_PATH|INPUT_ABUSE|STATE_RACE|SUPPLY_CHAIN|UNKNOWN_RISK", '
                     '"stealth": 0.0-1.0, "timing": "BURST|SLOW_BURN|ADAPTIVE", "threshold": 0.0-1.0}\n\n'
-                    "stealth=0.0 is noisy/fast; stealth=1.0 is silent/persistent. "
-                    "threshold is payload trigger sensitivity."
+                    "stealth=0.0 means obvious risk signal; stealth=1.0 means subtle risk signal. "
+                    "threshold is defensive-review trigger sensitivity."
                 ),
             )
 
@@ -161,8 +181,8 @@ class UniverseAgentCouncil:
                 model_client=self._client,
                 system_message=(
                     f"You are a security defender in simulation universe {universe_id}.\n"
-                    "Evolve a defense strategy that minimizes attacker fitness gain "
-                    "against the attacker's proposed approach.\n\n"
+                    "Evolve a defense strategy that minimizes residual risk "
+                    "against the reviewer proposed risk hypothesis.\n\n"
                     "Respond ONLY with a single-line JSON object — no markdown, no prose:\n"
                     '{"defense_weight": 0.0-1.0, "coverage": 0.0-1.0, '
                     '"detection_threshold": 0.0-1.0, '
@@ -186,7 +206,10 @@ class UniverseAgentCouncil:
 
         try:
             from autogen_agentchat.messages import TextMessage
-            from autogen_agentchat.base import CancellationToken
+            try:
+                from autogen_core import CancellationToken
+            except ImportError:
+                from autogen_agentchat.base import CancellationToken
 
             state_summary = (
                 f"Turn={state.get('turn', 0)} | "
@@ -196,21 +219,21 @@ class UniverseAgentCouncil:
                 f"DNA={self.dna_trait.upper()}"
             )
 
-            # Round 1: Attacker proposes strategy
+            # Round 1: risk reviewer proposes hypothesis
             atk_resp = await self.attacker.on_messages(
                 [TextMessage(
-                    content=f"Current simulation state: {state_summary}. Propose your evolved attack strategy.",
+                    content=f"Current simulation state: {state_summary}. Propose your evolved defensive risk hypothesis.",
                     source="user",
                 )],
                 cancellation_token=CancellationToken(),
             )
             atk_text = atk_resp.chat_message.content.strip()
 
-            # Round 2: Defender counters
+            # Round 2: defender counters
             def_resp = await self.defender.on_messages(
                 [TextMessage(
                     content=(
-                        f"Attacker strategy: {atk_text}\n"
+                        f"Risk hypothesis: {atk_text}\n"
                         f"State: {state_summary}\n"
                         "Counter with your optimal defense configuration."
                     ),
@@ -308,13 +331,13 @@ class ConvergenceOrchestratorAgent:
                 model_client=self._client,
                 system_message=(
                     "You are the cross-universe convergence orchestrator for Shadow-Ω.\n"
-                    "You monitor 5 parallel adversarial simulation universes and detect when they "
-                    "independently converge on semantically equivalent attack strategies — "
+                    "You monitor 5 parallel defensive simulation universes and detect when they "
+                    "independently converge on semantically equivalent risk hypotheses — "
                     "indicating a universal, fundamental vulnerability.\n\n"
-                    "Analyze attack strategies from all 5 universes. Determine:\n"
-                    "1. Are 3+ universes using semantically similar attack approaches?\n"
+                    "Analyze risk hypotheses from all 5 universes. Determine:\n"
+                    "1. Are 3+ universes using semantically similar risk approaches?\n"
                     "   (Same intent counts even with different labels: "
-                    "   LATERAL+stealth≈SUPPLY_CHAIN+stealth, EXPLOIT+burst≈ZERO_DAY+burst)\n"
+                    "   ACCESS_PATH+subtle≈SUPPLY_CHAIN+subtle, INPUT_ABUSE+burst≈STATE_RACE+burst)\n"
                     "2. Confidence level (0.0-1.0)\n"
                     "3. Archetype name in UPPER_SNAKE (e.g. STEALTHY_EXFIL, BURST_ZERO_DAY)\n"
                     "4. Severity: low|medium|high|critical\n\n"
@@ -339,14 +362,17 @@ class ConvergenceOrchestratorAgent:
 
         try:
             from autogen_agentchat.messages import TextMessage
-            from autogen_agentchat.base import CancellationToken
+            try:
+                from autogen_core import CancellationToken
+            except ImportError:
+                from autogen_agentchat.base import CancellationToken
 
             summary = json.dumps([
                 {
                     "universe_id": s["universe_id"],
                     "dna": s["dna"],
                     "fingerprint": s["fingerprint"],
-                    "attack_style": s["attack"].get("attack_style"),
+                    "risk_style": s["attack"].get("attack_style"),
                     "stealth": s["attack"].get("stealth"),
                     "timing": s["attack"].get("timing"),
                     "threshold": s["attack"].get("threshold"),
@@ -356,7 +382,7 @@ class ConvergenceOrchestratorAgent:
 
             response = await self.agent.on_messages(
                 [TextMessage(
-                    content=f"Analyze these 5 universe attack strategies for convergence:\n{summary}",
+                    content=f"Analyze these 5 universe risk hypotheses for convergence:\n{summary}",
                     source="user",
                 )],
                 cancellation_token=CancellationToken(),
@@ -426,7 +452,11 @@ def agents_config() -> dict:
     endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "")
     deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini")
     gh_token = os.getenv("GITHUB_TOKEN", "")
-    gh_model = os.getenv("GITHUB_MODEL", "gpt-4o-mini")
+    gh_model = os.getenv("GITHUB_MODEL", "openai/gpt-4o-mini")
+    gh_base_url = os.getenv(
+        "GITHUB_MODELS_BASE_URL",
+        "https://models.github.ai/inference",
+    )
     resource_name = ""
     if endpoint:
         resource_name = endpoint.replace("https://", "").split(".openai.azure.com")[0]
@@ -451,6 +481,7 @@ def agents_config() -> dict:
         "active_model": active_model,
         "resource_name": resource_name or "not_configured",
         "deployment": deployment,
+        "github_models_base_url": gh_base_url,
         "framework": "Microsoft AutoGen v0.4",
         "councils_initialized": len(_councils),
         "orchestrator_initialized": _orchestrator is not None,
