@@ -8,3 +8,4 @@ scikit-learn>=1.5.0
 autogen-agentchat>=0.4.0
 autogen-ext[openai]>=0.4.0
 openai>=1.0.0
+mcp>=1.0.0

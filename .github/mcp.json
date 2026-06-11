@@ -1,0 +1,15 @@
+{
+  "shadow-omega-auditor": {
+    "type": "local",
+    "command": "python",
+    "args": [
+      "t1-shadow-omega-core/mcp_server.py"
+    ],
+    "env": {
+      "SHADOW_OMEGA_BACKEND_URL": "http://localhost:8090"
+    },
+    "tools": [
+      "*"
+    ]
+  }
+}
