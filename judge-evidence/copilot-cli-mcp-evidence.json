@@ -1,8 +1,11 @@
 {
   "schema": "shadow-omega.copilot-cli-mcp-evidence.v1",
   "observed_at": "2026-06-11T20:34:21+09:00",
+  "evidence_kind": "sanitized_transcription_of_observed_copilot_cli_run",
+  "observation_method": "Live Copilot CLI run observed locally, then manually reduced to server names, tool names, public result fields, and success flags.",
+  "regeneration_scope": "generate_judge_evidence.py reproduces this sanitized evidence file from the recorded observation; it does not replay Copilot CLI.",
   "raw_logs_committed": false,
-  "reason": "Raw Copilot JSONL contains reasoning events; this file keeps only sanitized tool-call evidence.",
+  "reason": "Raw Copilot JSONL contains reasoning events; this file keeps only a sanitized observation transcript of tool-call evidence.",
   "mcp_config_recognition": {
     "command": "gh copilot -- mcp get shadow-omega-auditor --json",
     "server": "shadow-omega-auditor",
@@ -57,6 +60,7 @@
   "reproduction_notes": [
     "Wrap .mcp.json under a top-level mcpServers object when passing --additional-mcp-config.",
     "Use --allow-tool='shadow-omega-auditor' so Copilot CLI can call the local MCP server non-interactively.",
+    "This JSON is a sanitized transcription, not a raw log export and not a replay harness.",
     "Do not commit raw JSONL; sanitize to tool names, status, and public outputs."
   ]
 }

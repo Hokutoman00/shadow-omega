@@ -98,7 +98,7 @@ Observed result:
 - With that wrapper, Copilot CLI loaded `shadow-omega-auditor` as a connected stdio MCP server.
 - Copilot CLI issued real tool requests to `get_shadow_omega_brief`, `generate_convergence_certificate`, and `run_closed_loop_demo`.
 - The certificate run returned `status=converged`, `finding=non_atomic_value_transfer`, `converged_universes=3`, `closed_loop_result=mitigated`, and `after_patch_status=not_converged`.
-- Raw JSONL logs are not committed because they contain model reasoning events. Sanitized tool-call evidence is committed in `judge-evidence/copilot-cli-mcp-evidence.json`.
+- Raw JSONL logs are not committed because they contain model reasoning events. A sanitized transcription of the observed tool-call evidence is committed in `judge-evidence/copilot-cli-mcp-evidence.json`.
 
 Minimal wrapper:
 
@@ -145,7 +145,7 @@ The Creative Apps track asks for innovative applications built with GitHub Copil
 
 `judge-evidence/` contains the score-focused evidence added after final review:
 
-- `copilot-cli-mcp-evidence.json` - sanitized proof of Copilot CLI loading and calling the MCP server.
+- `copilot-cli-mcp-evidence.json` - sanitized transcription of Copilot CLI loading and calling the MCP server.
 - `convergence-trace-risky-transfer.json` - five-universe trace for the risky transfer fixture.
 - `certificate-risky-transfer.json` - `simulation_trace_hybrid` certificate whose votes include `trace_turn`, `strategy_fingerprint`, fitness, sigma, and observed source lines.
 - `closed-loop-risky-transfer.json` - patch and after-patch re-audit proof.
