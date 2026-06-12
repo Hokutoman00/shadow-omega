@@ -2,10 +2,12 @@
 Model Context Protocol (MCP) server for Shadow-Omega multiverse code auditor.
 
 Exposes the Shadow-Omega backend HTTP API (port 8090) to GitHub Copilot agent mode
-in VS Code via three MCP tools:
+in VS Code via MCP tools:
   1. audit_code(source_code: str) - Analyze source code through multiverse simulation
   2. get_multiverse_status() - Current universe fitness / convergence state
   3. export_eslint_rules() - ESLint rule skeletons from fossil record
+  4. ground_finding_in_knowledge_base(finding) - Foundry IQ citation grounding
+  5. get_knowledge_provenance() - which grounding path (live / snapshot) is active
 
 Uses Python stdlib (urllib.request) for HTTP communication.
 """
@@ -21,6 +23,7 @@ from convergence_certificate import (
     build_convergence_certificate,
     dumps as dumps_certificate,
 )
+from foundry_iq_grounding import ground_finding, provenance_status
 from mcp.server.fastmcp import FastMCP
 
 # ── Configuration ──────────────────────────────────────────────────────────
@@ -257,6 +260,43 @@ def export_eslint_rules() -> str:
         },
         ensure_ascii=False,
     )
+
+
+@mcp.tool()
+def ground_finding_in_knowledge_base(finding: str) -> str:
+    """
+    Ground a certificate finding in the Foundry IQ knowledge base.
+
+    Retrieves citation-backed CWE/OWASP knowledge for the given finding from
+    the shadow-omega-kb knowledge base (Azure AI Search agentic retrieval).
+    Falls back to a bundled snapshot of recorded retrieve responses when Azure
+    credentials are not configured; the provenance field on every citation
+    distinguishes the two paths ("foundry_iq_live" vs "bundled_snapshot").
+
+    Args:
+        finding: one of non_atomic_value_transfer, invalid_amount_transfer,
+                 direct_authority_mutation, no_convergence
+
+    Returns:
+        JSON string with citations (doc_key, CWE/OWASP ids, source_url,
+        excerpt, provenance) and retrieval activity
+    """
+    return json.dumps(ground_finding(finding), ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def get_knowledge_provenance() -> str:
+    """
+    Report which Foundry IQ grounding path is currently active.
+
+    Shows whether the Azure AI Search credentials are configured (presence as
+    booleans only -- never the values), the knowledge base / knowledge source
+    names, the API version, and the corpus document count.
+
+    Returns:
+        JSON string describing the active grounding path
+    """
+    return json.dumps(provenance_status(), ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":

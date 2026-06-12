@@ -7,8 +7,10 @@ __pycache__/
 .venv/
 venv/
 
-# Runtime data
-t1-shadow-omega-core/data/
+# Runtime data (the curated corpus and the retrieve snapshot are repo content)
+t1-shadow-omega-core/data/*
+!t1-shadow-omega-core/data/security_knowledge_corpus.json
+!t1-shadow-omega-core/data/foundry_iq_snapshot.json
 
 # Frontend
 t1-agents-league-ui/node_modules/

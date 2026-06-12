@@ -39,6 +39,8 @@ async def main() -> None:
                 "run_closed_loop_demo",
                 "get_multiverse_status",
                 "export_eslint_rules",
+                "ground_finding_in_knowledge_base",
+                "get_knowledge_provenance",
             }
             missing = expected.difference(names)
             if missing:
@@ -75,6 +77,14 @@ async def main() -> None:
                     )
                 },
             )
+            grounding = await session.call_tool(
+                "ground_finding_in_knowledge_base",
+                {"finding": "non_atomic_value_transfer"},
+            )
+            provenance = await session.call_tool("get_knowledge_provenance", {})
+
+            grounding_payload = json.loads(grounding.content[0].text)
+            provenance_payload = json.loads(provenance.content[0].text)
 
             print(
                 json.dumps(
@@ -85,6 +95,9 @@ async def main() -> None:
                         "audit_response_ok": bool(audit.content),
                         "certificate_ok": bool(certificate.content),
                         "closed_loop_ok": bool(loop.content),
+                        "grounding_ok": bool(grounding_payload.get("citations")),
+                        "grounding_provenance": grounding_payload.get("provenance"),
+                        "knowledge_path": provenance_payload.get("active_path"),
                     },
                     indent=2,
                 )
