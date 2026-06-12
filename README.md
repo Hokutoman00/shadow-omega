@@ -87,7 +87,7 @@ python -m unittest discover t1-shadow-omega-core -p "test_foundry_iq_grounding.p
 
 Two properties make this judge-friendly and honest:
 
-- **Zero-credential reproducibility.** Without `AZURE_SEARCH_ENDPOINT` / `AZURE_SEARCH_ADMIN_KEY`, the pipeline replays recorded retrieve responses from [data/foundry_iq_snapshot.json](t1-shadow-omega-core/data/foundry_iq_snapshot.json) through the exact same unpack/citation code path.
+- **Zero-credential reproducibility.** Without `AZURE_SEARCH_ENDPOINT` / `AZURE_SEARCH_ADMIN_KEY`, the pipeline replays the bundled snapshot in [data/foundry_iq_snapshot.json](t1-shadow-omega-core/data/foundry_iq_snapshot.json) — GA retrieve response shape, honestly labelled with its capture status in the file itself — through the exact same unpack/citation code path. `--snapshot` regenerates it from the live knowledge base once provisioned.
 - **Provenance is machine-enforced, never silent.** Every citation carries `"provenance": "foundry_iq_live"` or `"bundled_snapshot"`, fixed at the entry point of each path. The `get_knowledge_provenance` MCP tool reports which path is active (credential presence as booleans only).
 
 The knowledge base also exposes its own **per-KB MCP endpoint** (`/knowledgebases/shadow-omega-kb/mcp`), so the project carries a double MCP architecture: Copilot → Shadow-Ω auditor (stdio) and Shadow-Ω → Foundry IQ knowledge base (HTTP).
