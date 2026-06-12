@@ -15,6 +15,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from foundry_iq_grounding import ground_finding
+
 
 @dataclass(frozen=True)
 class UniverseProfile:
@@ -404,8 +406,18 @@ def build_convergence_certificate(source_code: str) -> dict[str, Any]:
     status = "converged" if converged_count >= 3 else "not_converged"
     severity = "high" if status == "converged" else "none"
 
+    grounding = ground_finding(top_finding)
+    grounding_citations = grounding.get("citations", [])
+    patch_doc_keys = sorted(
+        {
+            citation["doc_key"]
+            for citation in grounding_citations
+            if citation["doc_key"].startswith("patch-")
+        }
+    )
+
     return {
-        "schema": "shadow-omega.convergence-certificate.v1",
+        "schema": "shadow-omega.convergence-certificate.v2",
         "mode": "simulation_trace_hybrid",
         "subject_sha256": hashlib.sha256(source_code.encode("utf-8")).hexdigest(),
         "status": status,
@@ -447,18 +459,33 @@ def build_convergence_certificate(source_code: str) -> dict[str, Any]:
                     "Copilot/MCP review."
                 ),
             },
+            {
+                "type": "foundry_iq_knowledge_grounding",
+                "knowledge_base": grounding.get("knowledge_base"),
+                "provenance": grounding.get("provenance"),
+                "citation_count": len(grounding_citations),
+                "note": (
+                    "Citations retrieved from the Foundry IQ knowledge base "
+                    "(Azure AI Search agentic retrieval); provenance distinguishes "
+                    "live retrieval from the bundled snapshot replay."
+                ),
+            },
         ],
+        "knowledge_grounding": grounding,
         "universe_votes": votes,
         "invariant": (
             "A finding is certifiable only when at least 3 independent universe profiles "
             "arrive at the same vulnerability family."
         ),
-        "recommended_patch_strategy": (
-            "Validate amount, move balance changes into a transaction/lock, and preserve "
-            "the pattern as an ESLint rule."
-            if status == "converged"
-            else "No converged high-confidence patch strategy from this fixture."
-        ),
+        "recommended_patch_strategy": {
+            "strategy": (
+                "Validate amount, move balance changes into a transaction/lock, and preserve "
+                "the pattern as an ESLint rule."
+                if status == "converged"
+                else "No converged high-confidence patch strategy from this fixture."
+            ),
+            "grounded_in": patch_doc_keys,
+        },
         "eslint_rule_skeleton": _eslint_rule_skeleton() if status == "converged" else None,
     }
 

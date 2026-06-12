@@ -1,0 +1,257 @@
+{
+  "schema": "shadow-omega.foundry-iq-snapshot.v1",
+  "knowledge_base": "shadow-omega-kb",
+  "api_version": "2026-04-01",
+  "captured_at": null,
+  "note": "Provisional pre-capture snapshot built deterministically from the bundled corpus in the GA retrieve response shape. Regenerate from the live knowledge base with: python foundry_iq_provision.py --snapshot (captured_at becomes a real timestamp and elapsedMs real latencies).",
+  "responses": {
+    "non_atomic_value_transfer": {
+      "response": [
+        {
+          "content": [
+            {
+              "type": "text",
+              "text": "[{\"ref_id\": \"0\", \"title\": \"CWE-362: Concurrent Execution using Shared Resource with Improper Synchronization\", \"terms\": \"race condition, TOCTOU, non-atomic update, check-then-act, time-of-check time-of-use, interleaving\", \"content\": \"A race condition exists when code containing a sequence that must run atomically can be interleaved with another code sequence that operates concurrently on the same shared state. The classic value-transfer instance is check-then-act: a guard reads a balance (balance >= amount) and a later instruction mutates it (balance -= amount). Between the check and the act, a concurrent request can pass the same guard against the stale balance, allowing the transfer to be repeated or drained beyond available funds. This is exactly the shape Shadow-Omega's non_atomic_value_transfer finding certifies: a balance guard, split mutations of two account-like values, and no transaction or lock boundary protecting the window. Durable mitigation requires serializing the read-check-mutate sequence so no other actor can observe or modify the intermediate state.\"}, {\"ref_id\": \"1\", \"title\": \"CWE-667: Improper Locking\", \"terms\": \"improper locking, missing lock, lock granularity, critical section, mutex misuse, unguarded mutation\", \"content\": \"Improper locking occurs when software does not properly acquire or release a lock on a resource, leading to unexpected resource state and race-condition exploitation. Two failure shapes matter for audited transfer code: (1) no lock at all around a critical section that reads a guard condition and then mutates shared state, and (2) a lock with wrong granularity, where the guard is checked under one lock acquisition but the mutation happens after release, reopening the window. In Shadow-Omega traces this appears as turns where the balance_guard surface and the state_mutation surface have line hits but the atomicity_boundary surface is empty. The fix is to hold a single lock or transaction across the entire guard-plus-mutation span, and to treat any early release between check and write as a regression.\"}, {\"ref_id\": \"2\", \"title\": \"Patch Pattern: Serialize Value Transfers with Transactions, Locks, or Compare-and-Swap\", \"terms\": \"mutex, compare-and-swap, CAS, transaction, getForUpdate, optimistic concurrency, serialization patch\", \"content\": \"The certified patch family for non-atomic value transfers serializes the read-check-mutate sequence. Pessimistic form: wrap the transfer in a storage transaction and load both accounts with a for-update / getForUpdate read so the guard (balance >= amount) and both mutations commit as one atomic unit. Optimistic form: re-read the balance at write time and apply a compare-and-swap that only commits if the balance still equals the value the guard observed, retrying on conflict. Either form closes the interleaving window that drain_repetition and race_window strategies exploit. The patch is complete only when amount validation also exists, because atomicity alone does not stop a negative or non-finite amount from inverting the transfer. Shadow-Omega's closed-loop demo re-audits the patched code and expects not_converged as the proof of mitigation.\"}]"
+            }
+          ]
+        }
+      ],
+      "references": [
+        {
+          "type": "searchIndex",
+          "id": "0",
+          "activitySource": 2,
+          "docKey": "cwe-362-race-condition",
+          "sourceData": {
+            "id": "cwe-362-race-condition",
+            "title": "CWE-362: Concurrent Execution using Shared Resource with Improper Synchronization",
+            "cwe_id": "CWE-362",
+            "owasp_id": "A04:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/362.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "1",
+          "activitySource": 2,
+          "docKey": "cwe-667-improper-locking",
+          "sourceData": {
+            "id": "cwe-667-improper-locking",
+            "title": "CWE-667: Improper Locking",
+            "cwe_id": "CWE-667",
+            "owasp_id": "A04:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/667.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "2",
+          "activitySource": 2,
+          "docKey": "patch-mutex-cas",
+          "sourceData": {
+            "id": "patch-mutex-cas",
+            "title": "Patch Pattern: Serialize Value Transfers with Transactions, Locks, or Compare-and-Swap",
+            "cwe_id": "CWE-362",
+            "owasp_id": "A04:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/362.html"
+          }
+        }
+      ],
+      "activity": [
+        {
+          "type": "searchIndex",
+          "id": 2,
+          "knowledgeSourceName": "shadow-omega-security-ks",
+          "count": 3,
+          "elapsedMs": null
+        }
+      ]
+    },
+    "invalid_amount_transfer": {
+      "response": [
+        {
+          "content": [
+            {
+              "type": "text",
+              "text": "[{\"ref_id\": \"0\", \"title\": \"CWE-20: Improper Input Validation\", \"terms\": \"input validation, untrusted input, negative value, NaN, infinity, type confusion, boundary check\", \"content\": \"Improper input validation means the product receives input but does not validate, or incorrectly validates, that the input has the properties required to process it safely. For money-movement code the highest-impact instance is the amount parameter: if a caller-supplied amount can be negative, NaN, or Infinity, arithmetic that was written for positive finite numbers inverts or corrupts balances. A transfer guarded only by balance >= amount passes for a negative amount on most comparisons, then balance -= amount silently increases the sender's balance. Shadow-Omega's invalid_amount_transfer finding fires on exactly this surface: an amount that reaches mutation lines without a positivity and finiteness gate. Validation must happen before any state change, must reject rather than coerce, and must cover every entry path to the mutation.\"}, {\"ref_id\": \"1\", \"title\": \"CWE-682: Incorrect Calculation\", \"terms\": \"incorrect calculation, sign inversion, overflow, floating point, balance arithmetic, numeric edge case\", \"content\": \"Incorrect calculation covers code that computes a value with wrong or unexpected arithmetic, producing security-relevant outcomes when the value controls resource movement. In transfer logic the dangerous calculations are the paired mutations (sender balance decrement, receiver balance increment): with an unvalidated amount the pair can move value in the wrong direction (negative amount), destroy it (NaN propagates through both balances), or saturate it (Infinity). Floating-point representation adds a second layer: amounts near precision limits can make balance >= amount true while the subsequent subtraction loses the difference. Audit evidence for this class is the amount_validation surface being empty while state_mutation lines exist. Mitigation pairs an explicit finiteness-and-range gate with integer or decimal arithmetic for monetary values.\"}, {\"ref_id\": \"2\", \"title\": \"CWE-1284: Improper Validation of Specified Quantity in Input\", \"terms\": \"quantity validation, amount bounds, minimum maximum, zero amount, range gate, business limit\", \"content\": \"CWE-1284 is the quantity-specific child of improper input validation: the product receives input expected to specify a quantity such as an amount, size, or count, but does not validate that the quantity lies within the required range. For transfers the required range is strictly positive, finite, and within business limits (per-transaction maximum, available balance after concurrent settlement). A zero amount is also hostile in fee-bearing or event-emitting systems because it produces legitimate-looking activity with no value movement. The canonical guard shape is a single early gate: reject when the amount is not a finite number or is less than or equal to zero, before any account is loaded or mutated. Shadow-Omega's invalid_amount_transfer vote cites the absence of exactly this gate on the lines where amounts first arrive.\"}, {\"ref_id\": \"3\", \"title\": \"Patch Pattern: Early Amount Guard with Finiteness and Positivity Checks\", \"terms\": \"amount guard, Number.isFinite, positive amount, early return, reject coercion, validation patch\", \"content\": \"The certified patch family for invalid amounts is a single early guard placed before any account read or mutation: reject the request when the amount is not a finite number or is less than or equal to zero (in JavaScript: if (!Number.isFinite(amount) || amount <= 0) throw). The guard must throw or return an error rather than coerce, because coercion (Math.abs, rounding, defaulting) preserves a path where hostile input still moves value. Placing the guard before account loading also removes a resource-consumption vector where invalid requests still cost storage reads. When combined with the transaction/lock serialization patch, the two guards close both certified findings: the amount gate stops range inversion, and the atomic boundary stops interleaving. Shadow-Omega's after-patch certificate verifies both surfaces are present before reporting mitigated.\"}]"
+            }
+          ]
+        }
+      ],
+      "references": [
+        {
+          "type": "searchIndex",
+          "id": "0",
+          "activitySource": 2,
+          "docKey": "cwe-20-input-validation",
+          "sourceData": {
+            "id": "cwe-20-input-validation",
+            "title": "CWE-20: Improper Input Validation",
+            "cwe_id": "CWE-20",
+            "owasp_id": "A03:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/20.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "1",
+          "activitySource": 2,
+          "docKey": "cwe-682-incorrect-calculation",
+          "sourceData": {
+            "id": "cwe-682-incorrect-calculation",
+            "title": "CWE-682: Incorrect Calculation",
+            "cwe_id": "CWE-682",
+            "owasp_id": "A04:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/682.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "2",
+          "activitySource": 2,
+          "docKey": "cwe-1284-quantity-validation",
+          "sourceData": {
+            "id": "cwe-1284-quantity-validation",
+            "title": "CWE-1284: Improper Validation of Specified Quantity in Input",
+            "cwe_id": "CWE-1284",
+            "owasp_id": "A03:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/1284.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "3",
+          "activitySource": 2,
+          "docKey": "patch-amount-guard",
+          "sourceData": {
+            "id": "patch-amount-guard",
+            "title": "Patch Pattern: Early Amount Guard with Finiteness and Positivity Checks",
+            "cwe_id": "CWE-1284",
+            "owasp_id": "A03:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/1284.html"
+          }
+        }
+      ],
+      "activity": [
+        {
+          "type": "searchIndex",
+          "id": 2,
+          "knowledgeSourceName": "shadow-omega-security-ks",
+          "count": 4,
+          "elapsedMs": null
+        }
+      ]
+    },
+    "direct_authority_mutation": {
+      "response": [
+        {
+          "content": [
+            {
+              "type": "text",
+              "text": "[{\"ref_id\": \"0\", \"title\": \"CWE-269: Improper Privilege Management\", \"terms\": \"privilege management, privilege escalation, role mutation, authority assignment, admin flag\", \"content\": \"Improper privilege management means the product does not properly assign, modify, track, or check privileges for an actor, creating an unintended sphere of control. The code-level signature in audited services is a direct write to an authority-bearing field (role, isAdmin, permissions, owner) reachable from caller-controlled input without an authorization decision point in between. Once any caller can mutate authority state, every other guard in the system becomes advisory, because the attacker first grants themselves the privilege the guard checks. Shadow-Omega's direct_authority_mutation finding certifies this pattern when account-like objects are mutated with no explicit authority boundary between the caller and the write. Mitigation routes every privilege change through a single guarded API that authenticates the actor, authorizes the specific transition, and records it.\"}, {\"ref_id\": \"1\", \"title\": \"CWE-284: Improper Access Control\", \"terms\": \"access control, authorization, reference monitor, missing check, object-level authorization\", \"content\": \"Improper access control means the product does not restrict, or incorrectly restricts, access to a resource from an unauthorized actor. The structural cause is the absence of a reference monitor: a single enforcement point that every access to the protected resource must traverse. In service code this appears as handlers that fetch and mutate account-like objects identified by caller-supplied IDs without verifying the caller's relationship to those objects (object-level authorization), so any authenticated user can operate on any account. Shadow-Omega's insider-mutator universe profile searches for exactly these unmediated state mutations. The mitigation is architectural rather than local: define the authority boundary as an explicit API, make direct state mutation impossible outside it, and verify the caller-resource relationship inside it on every call.\"}, {\"ref_id\": \"2\", \"title\": \"OWASP A01:2021 - Broken Access Control\", \"terms\": \"broken access control, OWASP Top 10, IDOR, deny by default, least privilege, CORS misconfiguration\", \"content\": \"Broken Access Control moved to the top of the OWASP Top 10 in 2021, with 94% of tested applications showing some form of the weakness. The category aggregates failures where users can act outside their intended permissions: insecure direct object references (acting on another user's account by supplying its identifier), missing function-level checks on privileged operations, and metadata manipulation such as tampering with role claims. The prescribed defenses are deny by default, implementing access control once in a trusted server-side enforcement point and reusing it everywhere, enforcing record ownership at the data layer, and logging access control failures. For Shadow-Omega's direct_authority_mutation finding, A01 supplies the policy frame: the patch is not a scattered set of if-checks but a single deny-by-default authority boundary that owns all account mutations.\"}, {\"ref_id\": \"3\", \"title\": \"Patch Pattern: Guarded Authority API for All Account-State Mutations\", \"terms\": \"guarded API, authority boundary, capability check, single enforcement point, audit log, deny by default\", \"content\": \"The certified patch family for direct authority mutation introduces a guarded authority API as the only legal writer of account-like state. Concretely: make raw account objects immutable or private to the module; expose mutation only through functions that take the acting principal as an explicit argument; inside each function, authorize the specific transition (actor owns the account, or actor holds a capability for this operation) before applying it; deny by default when no rule matches; and append every authority-relevant change to an audit log. This converts the access-control property from a scattered convention into a checkable structural invariant: a reviewer or Shadow-Omega re-audit can verify that no state_mutation line exists outside the guarded module. The pattern composes with the transaction patch, since the guarded API is the natural place to open the atomic boundary.\"}]"
+            }
+          ]
+        }
+      ],
+      "references": [
+        {
+          "type": "searchIndex",
+          "id": "0",
+          "activitySource": 2,
+          "docKey": "cwe-269-privilege-management",
+          "sourceData": {
+            "id": "cwe-269-privilege-management",
+            "title": "CWE-269: Improper Privilege Management",
+            "cwe_id": "CWE-269",
+            "owasp_id": "A01:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/269.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "1",
+          "activitySource": 2,
+          "docKey": "cwe-284-access-control",
+          "sourceData": {
+            "id": "cwe-284-access-control",
+            "title": "CWE-284: Improper Access Control",
+            "cwe_id": "CWE-284",
+            "owasp_id": "A01:2021",
+            "source_url": "https://cwe.mitre.org/data/definitions/284.html"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "2",
+          "activitySource": 2,
+          "docKey": "owasp-a01-broken-access-control",
+          "sourceData": {
+            "id": "owasp-a01-broken-access-control",
+            "title": "OWASP A01:2021 - Broken Access Control",
+            "cwe_id": "CWE-284",
+            "owasp_id": "A01:2021",
+            "source_url": "https://owasp.org/Top10/A01_2021-Broken_Access_Control/"
+          }
+        },
+        {
+          "type": "searchIndex",
+          "id": "3",
+          "activitySource": 2,
+          "docKey": "patch-guarded-authority-api",
+          "sourceData": {
+            "id": "patch-guarded-authority-api",
+            "title": "Patch Pattern: Guarded Authority API for All Account-State Mutations",
+            "cwe_id": "CWE-284",
+            "owasp_id": "A01:2021",
+            "source_url": "https://owasp.org/Top10/A01_2021-Broken_Access_Control/"
+          }
+        }
+      ],
+      "activity": [
+        {
+          "type": "searchIndex",
+          "id": 2,
+          "knowledgeSourceName": "shadow-omega-security-ks",
+          "count": 4,
+          "elapsedMs": null
+        }
+      ]
+    },
+    "no_convergence": {
+      "response": [
+        {
+          "content": [
+            {
+              "type": "text",
+              "text": "[{\"ref_id\": \"0\", \"title\": \"OWASP A04:2021 Insecure Design - Residual Risk after Non-Convergence\", \"terms\": \"insecure design, residual risk, threat modeling, defense in depth, secure design review, no convergence\", \"content\": \"A non-converged audit is evidence of absence only within the threat models that were exercised, not absence of risk. OWASP A04:2021 (Insecure Design) frames what remains: weaknesses born from missing or ineffective control design cannot be detected by probing implementation surfaces, because the flaw is in what the design never required. When Shadow-Omega reports no_convergence, the residual-risk discipline is: (1) record which adversarial pressures were applied (the five universe profiles) so the claim's scope is explicit; (2) treat surfaces that had partial line hits as design-review candidates even without a certified finding; (3) apply defense in depth, since controls like rate limiting and audit logging reduce impact of unknown unknowns; and (4) re-run the audit when the code's value-transfer or authority topology changes, because non-convergence certifies a snapshot, not the design.\"}]"
+            }
+          ]
+        }
+      ],
+      "references": [
+        {
+          "type": "searchIndex",
+          "id": "0",
+          "activitySource": 2,
+          "docKey": "secure-design-residual-risk",
+          "sourceData": {
+            "id": "secure-design-residual-risk",
+            "title": "OWASP A04:2021 Insecure Design - Residual Risk after Non-Convergence",
+            "cwe_id": "CWE-657",
+            "owasp_id": "A04:2021",
+            "source_url": "https://owasp.org/Top10/A04_2021-Insecure_Design/"
+          }
+        }
+      ],
+      "activity": [
+        {
+          "type": "searchIndex",
+          "id": 2,
+          "knowledgeSourceName": "shadow-omega-security-ks",
+          "count": 1,
+          "elapsedMs": null
+        }
+      ]
+    }
+  }
+}

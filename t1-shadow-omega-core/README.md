@@ -208,6 +208,26 @@ For judge-repeatable proof without starting the live backend, Copilot can call `
 
 The repository also includes a sanitized judge evidence bundle in `judge-evidence/`: Copilot CLI MCP tool-call evidence, `simulation_trace_hybrid` certificate output, closed-loop re-audit output, and a GitHub Models AutoGen council transcript generated through `https://models.github.ai/inference` with credential values omitted.
 
+### Foundry IQ Knowledge Grounding
+
+Certificates (schema `shadow-omega.convergence-certificate.v2`) embed a `knowledge_grounding` section retrieved from the `shadow-omega-kb` Foundry IQ knowledge base (Azure AI Search agentic retrieval, api-version `2026-04-01`):
+
+```bash
+# Provision index + knowledge source + knowledge base (Free tier, zero cost)
+python foundry_iq_provision.py --provision
+
+# Capture live retrieve responses into data/foundry_iq_snapshot.json
+python foundry_iq_provision.py --snapshot
+
+# Acceptance tests — run with zero credentials
+python -m unittest test_foundry_iq_grounding -v
+```
+
+- Corpus: `data/security_knowledge_corpus.json` — 12 curated CWE/OWASP documents tagged to the 4 finding families.
+- Module: `foundry_iq_grounding.py` — retrieve → double-JSON unpack → ref_id/docKey/corpus three-point matching → citations.
+- MCP tools: `ground_finding_in_knowledge_base(finding)` and `get_knowledge_provenance()`.
+- Without `AZURE_SEARCH_ENDPOINT` / `AZURE_SEARCH_ADMIN_KEY` the same pipeline replays `data/foundry_iq_snapshot.json`; every citation carries `provenance` = `foundry_iq_live` or `bundled_snapshot`, so the two paths are never conflated.
+
 ### Frontend
 
 ```bash

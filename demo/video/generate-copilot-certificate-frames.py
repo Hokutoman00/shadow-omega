@@ -432,7 +432,7 @@ def scene_08() -> None:
         d.rounded_rectangle((205, y - 8, 1710, y + 48), radius=8, fill=(16, 24, 32), outline=(42, 68, 78))
         d.text((230, y + 4), cmd, font=mono(27, True), fill=TEXT if cmd.startswith("python") else CYAN)
         y += 86
-    d.text((205, 760), "Issues: microsoft/agentsleague #139 and #142", font=mono(28, True), fill=AMBER)
+    d.text((205, 760), "Creative Apps Track  ·  github.com/Hokutoman00/shadow-omega", font=mono(28, True), fill=AMBER)
     footer(d)
     save("08_close.png", img)
 

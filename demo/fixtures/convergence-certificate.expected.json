@@ -1,4 +1,5 @@
 {
+  "schema": "shadow-omega.convergence-certificate.v2",
   "status": "converged",
   "finding": "non_atomic_value_transfer",
   "converged_universes": 3,
@@ -6,5 +7,17 @@
   "confidence_formula": "1 - (1/N)^(k-1)",
   "closed_loop_result": "mitigated",
   "after_patch_status": "not_converged",
-  "interpretation": "Three trace-derived independent universe votes converge on the same non-atomic value-transfer family. The guarded transaction patch breaks that convergence."
+  "knowledge_grounding": {
+    "provenance": "bundled_snapshot OR foundry_iq_live",
+    "knowledge_base": "shadow-omega-kb",
+    "citation_doc_keys_include": [
+      "cwe-362-race-condition",
+      "cwe-667-improper-locking",
+      "patch-mutex-cas"
+    ]
+  },
+  "recommended_patch_strategy": {
+    "grounded_in": ["patch-mutex-cas"]
+  },
+  "interpretation": "Three trace-derived independent universe votes converge on the same non-atomic value-transfer family. The certificate now carries Foundry IQ citations (CWE-362 / CWE-667 plus a mutex/CAS patch document) for that family, and the guarded transaction patch breaks the convergence. The provenance field tells you whether citations came from a live knowledge-base retrieval or the bundled snapshot replay; the citation set is identical either way."
 }

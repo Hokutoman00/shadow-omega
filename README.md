@@ -66,9 +66,31 @@ The repository includes three MCP entry points:
 - [.github/mcp.json](.github/mcp.json) — GitHub workspace config fallback
 - [.vscode/mcp.json](.vscode/mcp.json) — VS Code Copilot Agent Mode config
 
-The server exposes `get_shadow_omega_brief`, `audit_code`, `generate_convergence_certificate`, `run_closed_loop_demo`, `get_multiverse_status`, and `export_eslint_rules`. Usage details and verification output live in [COPILOT_USAGE.md](COPILOT_USAGE.md).
+The server exposes `get_shadow_omega_brief`, `audit_code`, `generate_convergence_certificate`, `run_closed_loop_demo`, `get_multiverse_status`, `export_eslint_rules`, `ground_finding_in_knowledge_base`, and `get_knowledge_provenance`. Usage details and verification output live in [COPILOT_USAGE.md](COPILOT_USAGE.md).
 
 Sanitized P1/P2/P3 judge evidence lives in [judge-evidence/](judge-evidence/): Copilot CLI MCP tool calls, trace-backed certificate output, closed-loop re-audit, and a GitHub Models AutoGen council transcript with secret values omitted.
+
+## Foundry IQ Integration — Grounded Audit Knowledge Layer
+
+Every convergence certificate is grounded in a **Foundry IQ knowledge base** (Azure AI Search agentic retrieval, GA api-version `2026-04-01`). A curated 12-document CWE/OWASP corpus maps each finding family to citation-backed security knowledge, and the certificate's `knowledge_grounding` section carries the retrieved citations — `doc_key`, CWE/OWASP ids, source URL, excerpt — plus the `recommended_patch_strategy.grounded_in` patch documents.
+
+```bash
+# One-time provisioning (Azure AI Search Free tier is sufficient; zero cost)
+python t1-shadow-omega-core/foundry_iq_provision.py --provision
+
+# Record live retrieve responses into the bundled snapshot
+python t1-shadow-omega-core/foundry_iq_provision.py --snapshot
+
+# Acceptance tests (no credentials needed)
+python -m unittest discover t1-shadow-omega-core -p "test_foundry_iq_grounding.py" -v
+```
+
+Two properties make this judge-friendly and honest:
+
+- **Zero-credential reproducibility.** Without `AZURE_SEARCH_ENDPOINT` / `AZURE_SEARCH_ADMIN_KEY`, the pipeline replays recorded retrieve responses from [data/foundry_iq_snapshot.json](t1-shadow-omega-core/data/foundry_iq_snapshot.json) through the exact same unpack/citation code path.
+- **Provenance is machine-enforced, never silent.** Every citation carries `"provenance": "foundry_iq_live"` or `"bundled_snapshot"`, fixed at the entry point of each path. The `get_knowledge_provenance` MCP tool reports which path is active (credential presence as booleans only).
+
+The knowledge base also exposes its own **per-KB MCP endpoint** (`/knowledgebases/shadow-omega-kb/mcp`), so the project carries a double MCP architecture: Copilot → Shadow-Ω auditor (stdio) and Shadow-Ω → Foundry IQ knowledge base (HTTP).
 
 ## Convergence Certificate
 
@@ -105,6 +127,7 @@ judge-evidence/         Sanitized Copilot CLI, trace certificate, closed-loop, a
 
 - **Microsoft AutoGen v0.4** (`autogen-agentchat`, `autogen-ext[openai]`) — strategic agent council
 - **Azure AI Foundry** (priority 1) / **GitHub Models** (priority 2) / physics fallback (zero-credential)
+- **Foundry IQ** (Azure AI Search agentic retrieval) — citation-backed CWE/OWASP grounding for certificates, with a bundled-snapshot fallback
 - Python 3.11 + FastAPI + Server-Sent Events
 - React 18 + Vite 6 + Framer Motion + react-force-graph-3d (Three.js)
 - TDA persistence diagrams (H₀/H₁ barcodes), reservoir computing for universe-history compression
